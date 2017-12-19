@@ -1,4 +1,4 @@
-###1.Activity的生命周期全面分析
+### 1.Activity的生命周期全面分析
 onCreate()->onStart()->onResume()
 onPause()->onStop()->onDestory()
 
