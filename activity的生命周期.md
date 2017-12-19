@@ -10,5 +10,6 @@ onPause()->onStop()->onDestory()
     启动的逻辑顺序：A.onPause->B.onCreate->B.onStart->B.onResume->A.onStop，不要在onPause中做过多操作影响打开下个界面
     
  ### 2.异常情况下的生命周期分析
-    
+ 场景：1.资源相关的系统配置发生改变导致activity被杀死并重新创建（字体，横竖屏）
+       2.
 
