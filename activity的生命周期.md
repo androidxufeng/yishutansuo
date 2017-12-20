@@ -10,6 +10,40 @@ onPause()->onStop()->onDestory()
     启动的逻辑顺序：A.onPause->B.onCreate->B.onStart->B.onResume->A.onStop，不要在onPause中做过多操作影响打开下个界面
     
  ### 2.异常情况下的生命周期分析
- 场景：1.资源相关的系统配置发生改变导致activity被杀死并重新创建（字体，横竖屏）
-       2.
+ * 场景：1.资源相关的系统配置发生改变导致activity被杀死并重新创建（字体，横竖屏，语言）
+ </br>意外被杀死  在onStop之前会调用onSaveInstanceState保存状态，恢复时在onStart之前会调用onRestoreInstanceState恢复数据，具体保存的数据要看view的对应方法所恢复的值（委托思想：Activity->Window->DecorView->子view保存）
+ #### 以TextView为例
+```java
+     public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        // Save state if we are forced to
+        final boolean freezesText = getFreezesText();
+        if (mText != null) {
+            start = getSelectionStart();
+            end = getSelectionEnd();
+            if (start >= 0 || end >= 0) {
+                // Or save state if there is a selection
+                hasSelection = true;
+            }
+        }
+        if (freezesText || hasSelection) {
+            SavedState ss = new SavedState(superState);
+        if (hasSelection) {
+                // XXX Should also save the current scroll position!
+                ss.selStart = start;
+                ss.selEnd = end;
+            }
+            return ss;
+        }
+        return superState;
+    }
+```
+* 资源不足被杀死
+</br> 根据进程优先级来结束Activity
+
+### 3.Activity的启动模式
+standard 非Activity的context.startActivity，需要加上FLAG_ACTIVITY_NEW_TASK.
+singleTop 复用时会调用onNewIntent，不会走onCreate和onStart
+singleTask 任务栈S1中有ABC， D需要S2那么新建S2加入D ， D如果在S1,直接入栈S1， 如果加入B且在S1，singleTask默认clearTop，调用onNewIntent，C被弹出栈
+singleInstance
 
