@@ -42,8 +42,14 @@ onPause()->onStop()->onDestory()
 </br> 根据进程优先级来结束Activity
 
 ### 3.Activity的启动模式
-standard 非Activity的context.startActivity，需要加上FLAG_ACTIVITY_NEW_TASK.
-singleTop 复用时会调用onNewIntent，不会走onCreate和onStart
-singleTask 任务栈S1中有ABC， D需要S2那么新建S2加入D ， D如果在S1,直接入栈S1， 如果加入B且在S1，singleTask默认clearTop，调用onNewIntent，C被弹出栈
-singleInstance
+* standard 非Activity的context.startActivity，需要加上FLAG_ACTIVITY_NEW_TASK.
+* singleTop 复用时会调用onNewIntent，不会走onCreate和onStart
+* singleTask 任务栈S1中有ABC， D需要S2那么新建S2加入D ， D如果在S1,直接入栈S1， 如果加入B且在S1，singleTask默认clearTop，调用onNewIntent，C被弹出栈
+* singleInstance
+
+### 4.Activity的flag：有兴趣去研究
+
+### 5.intent_filter的匹配规则
+* 1.一个activity可以有多个intent_filter，只要匹配一个即可
+* 2.aciton（只要匹配一个即可） category(布局文件中的必须完全被匹配)  data(mimetype&uri)
 
