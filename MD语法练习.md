@@ -52,6 +52,7 @@
    int main()
    {
      printf("%s","Hello, moto")
+     return 0;
    }
 
 ```
