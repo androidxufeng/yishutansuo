@@ -19,6 +19,7 @@ onPause()->onStop()->onDestory()
 
 ### onRestoreInstanceState
 和onSaveInstance()不一定会成对出现，这个方法只会在activity真正的被异常杀死才会调用
+activity会默认保存部分View的状态，在Window->PhoneWindow.restoreHierarchyState()中遍历view的
     
  ### 2.异常情况下的生命周期分析
  * 场景：1.资源相关的系统配置发生改变导致activity被杀死并重新创建（字体，横竖屏，语言）
@@ -51,6 +52,9 @@ onPause()->onStop()->onDestory()
 ```
 * 资源不足被杀死
 </br> 根据进程优先级来结束Activity
+
+#### onConfigurationChanged()的常见问题
+1.以横竖屏切换为例 api13（orientation） api13以上（orientation | screenSize）
 
 ### 3.Activity的启动模式
 * standard 非Activity的context.startActivity，需要加上FLAG_ACTIVITY_NEW_TASK.
