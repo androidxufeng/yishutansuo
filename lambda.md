@@ -205,7 +205,82 @@ startActivity(intent);
         LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/operator/app
         LOCAL_DEX_PREOPT := false
 
+## 1.备份原理总结
 
+###  1.1.	联系人
+  联系人的导出格式在国际上有一套标准格式，即导出为vcf文件。Neffos自研联系人应用也有导出联系人vcf的功能，换机助手在备份联系人上采取了同一方案。Android原生的framework层frameworks/opt/vcard/java/com/android/vcard/中提供了这一功能。换机助手的备份还原联系人基于该库进行开发。
+###  1.2.	日程
+  日程的备份还原AOSP并没有提供方法。换机助手采用的是mtk提供的/alps/vendor/mediatek/proprietary/frameworks/opt/vcalendar库，在此基础上去除了与平台相关的代码。保证在其他厂商平台能够正常备份日程数据。
+###  1.3.	短信及通话记录
+ 短信及通话记录实现较为简单，均是通过读取数据库相应字段，然后持久化存储在文本文件中。
+ 
+##  2.	备份代码架构
+备份模块和项目整体一样采用MVP架构，组织结构如下：
+在具体功能 模块内看下模块内部类是如何划分的，在每个功能呢模块下面将类分作xxActivity，xxFragment，xxPresenter，xxContract。这些类构成了项目中的Presenter层和View层。
+在Android官方给出的MVP架构当中对于Presenter接口和View接口提供的形式与我们平时在网上所见的有所不同。
+在这里将Presenter中的接口和View的接口都放在了PackContract类里面。
+这样一来我们能够更清晰的看到在Presenter层和View层中有哪些功能，方便我们以后的维护。
 
+### 2.1.	Model层的实现
+         
+可以看到与备份相关的Model层被分为了两部分，backup与备份相关；local主要负责数据库相关的操作。
+以IBackupDataSource.java为例：
+```java
+  public interface IBackupDataSource {
+        
+    Flowable<Integer> getContactsCount();
+        
+    Flowable<Integer> getMessageCount();
+        
+    Flowable<Integer> getCallLogCount();
 
+    Flowable<Integer> getCalendarCount();
+
+    Flowable<List<CommonFile>> getAllPicPackData();
+
+    Flowable<List<CommonFile>> getAllVideoPackData();
+
+    Flowable<List<CommonFile>> getAllApkPackData();
+
+    /**
+     * 备份相关
+     */
+    Flowable<Integer> backupCallLog();
+
+    Flowable<Integer> backupContact();
+
+    Flowable<Integer> backupMms();
+
+    Flowable<Integer> backupSms();
+
+    Flowable<Integer> backupCalendar();
+
+  ```   
+  IBackupDataSource.java对外暴露接口，BackupDataSource.java负责具体实现细节，此处就不贴上代码。
+  最后由BackupAndRestoreRepository.java仓库类持有BackupDataSource.java的引用，
+  对Presenter层提供相对应的接口 
+
+  ```java
+    @Inject
+    public BackupAndRestoreRepository(IBackupDataSource backupDataSource) {
+        mBackupDataSource = backupDataSource;
+}
+
+    //略
+    @Override
+    public Flowable<Integer> backupCallLog() {
+        return mBackupDataSource.backupCallLog();
+    }
+
+    @Override
+    public Flowable<Integer> backupContact() {
+        return mBackupDataSource.backupContact();
+    }
+  ``` 
+## 2.2.	View层的实现
+对于View的实现是在Fragment中，而在Activity中则是完成对Fragment的添加，Presenter的创建操作。
+对于Activity的提供的功能也是非常的简单，首先创建Fragment对象并将其添加到Activity当中。
+之后创建Presenter对象，并将Fragment也就是View传递到Presenter中。
+可以看到通过Activity和Fragment分离非常适合对于MVP架构的实现。
+在这里将Activity作为全局的控制者将Presenter于View联系在一起。
 
