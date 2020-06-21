@@ -66,5 +66,7 @@ activity会默认保存部分View的状态，在Window->PhoneWindow.restoreHiera
 
 ### 5.intent_filter的匹配规则
 * 1.一个activity可以有多个intent_filter，只要匹配一个即可
-* 2.aciton（只要匹配一个即可） category(布局文件中的必须完全被匹配)  data(mimetype&uri)
+  + 2.aciton（代码中action只能和intent_filter中的一个对上即可） 
+  + category(代码中add的category必须全部都在 intent_filter中找得到匹配的)  
+  + data(mimetype&uri)
 
